@@ -7,9 +7,10 @@ interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
   steps: { id: number, label: string }[];
+  onStepClick: (step: number) => void;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, steps }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, steps, onStepClick }) => {
   return (
     <div className="relative mb-16">
       <div className="flex justify-between items-center mb-8">
@@ -27,11 +28,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, step
         <div className="hidden md:flex items-center gap-1">
           {steps.map((step, idx) => (
             <React.Fragment key={step.id}>
-              <div 
-                className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              <button
+                type="button"
+                onClick={() => onStepClick(step.id)}
+                className={`h-2 rounded-full transition-all duration-500 cursor-pointer hover:ring-4 hover:ring-gray-50 focus:outline-none ${
                   step.id === currentStep ? 'bg-black w-8' : 
-                  step.id < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                  step.id < currentStep ? 'bg-green-500 w-2' : 'bg-gray-200 w-2'
                 }`}
+                title={`Lompat ke Langkah ${step.id}: ${step.label}`}
               />
               {idx < steps.length - 1 && <div className="w-4 h-px bg-gray-100" />}
             </React.Fragment>
@@ -42,16 +46,18 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, step
       {/* Mobile labels */}
       <div className="flex md:hidden overflow-x-auto no-scrollbar gap-6 pb-2 border-b border-gray-50">
         {steps.map(step => (
-          <div 
+          <button
             key={step.id} 
-            className={`flex items-center gap-2 whitespace-nowrap shrink-0 transition-all ${
-              step.id === currentStep ? 'opacity-100 scale-105' : 'opacity-30'
+            type="button"
+            onClick={() => onStepClick(step.id)}
+            className={`flex items-center gap-2 whitespace-nowrap shrink-0 transition-all focus:outline-none ${
+              step.id === currentStep ? 'opacity-100 scale-105' : 'opacity-40 hover:opacity-70'
             }`}
           >
             <span className={`text-[10px] font-bold uppercase tracking-tighter ${step.id === currentStep ? 'text-black' : 'text-gray-400'}`}>
               {step.id}. {step.label}
             </span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

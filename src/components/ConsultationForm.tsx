@@ -9,6 +9,7 @@ import Step2 from './ConsultationForm/Step2';
 import Step3 from './ConsultationForm/Step3';
 import Step4 from './ConsultationForm/Step4';
 import Step5 from './ConsultationForm/Step5';
+import { ChevronUp, MessageCircle } from 'lucide-react';
 
 const steps = [
   { id: 1, label: 'Konsep' },
@@ -69,6 +70,35 @@ export default function ConsultationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [mathChallenge, setMathChallenge] = useState({ a: 0, b: 0, result: 0 });
   const [userAnswer, setUserAnswer] = useState('');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const generateWhatsAppLink = () => {
+    const number = "6281330763633";
+    let message = `*HALO ARIF, SAYA INGIN BERKONSULTASI*%0A%0A`;
+    
+    if (formData.clientName) message += `👤 *Nama:* ${formData.clientName}%0A`;
+    if (formData.websiteType) message += `🌐 *Jenis Web:* ${formData.websiteType}%0A`;
+    if (formData.techStack) message += `💻 *Tech Stack:* ${formData.techStack}%0A`;
+    if (formData.designStyle) message += `🎨 *Gaya Desain:* ${formData.designStyle}%0A`;
+    if (formData.budget) message += `💰 *Anggaran:* ${formData.budget}%0A`;
+    if (formData.domainName) message += `🔗 *Domain:* ${formData.domainName}${formData.domainExt}%0A`;
+    
+    message += `%0A_Dikirim via Digital Project Brief System_`;
+    
+    return `https://wa.me/${number}?text=${message}`;
+  };
 
   useEffect(() => {
     const generateChallenge = () => {
@@ -112,6 +142,11 @@ export default function ConsultationForm() {
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStepJump = (step: number) => {
+    setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -176,11 +211,17 @@ export default function ConsultationForm() {
     }
 
     if (parseInt(userAnswer) !== mathChallenge.result) {
+      // Generate new challenge if wrong
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      setMathChallenge({ a, b, result: a + b });
+      setUserAnswer('');
+
       setModalConfig({
         isOpen: true,
         type: 'error',
         title: 'Jawaban Salah',
-        message: `Buktikan Anda manusia! Hasil dari ${mathChallenge.a} + ${mathChallenge.b} adalah ${mathChallenge.result}, bukan ${userAnswer}.`
+        message: `Buktikan Anda manusia! Jawaban Anda salah. Coba lagi dengan soal baru ini.`
       });
       return;
     }
@@ -232,17 +273,25 @@ export default function ConsultationForm() {
     <form onSubmit={handleSubmit} className="max-w-6xl mx-auto py-12 px-4">
       <div className="space-y-12">
         
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} steps={steps} />
-
-        <ContactInfo formData={formData} setFormData={setFormData} errors={errors} />
+        <ProgressBar 
+          currentStep={currentStep} 
+          totalSteps={totalSteps} 
+          steps={steps} 
+          onStepClick={handleStepJump}
+        />
 
         <div className="relative min-h-[400px]">
           {currentStep === 1 && (
-            <Step1 
-              formData={formData} 
-              setFormData={setFormData} 
-              handleModuleToggle={handleModuleToggle} 
-            />
+            <div className="space-y-12">
+              <ContactInfo formData={formData} setFormData={setFormData} errors={errors} />
+              <div className="border-t border-gray-100 pt-12">
+                <Step1 
+                  formData={formData} 
+                  setFormData={setFormData} 
+                  handleModuleToggle={handleModuleToggle} 
+                />
+              </div>
+            </div>
           )}
 
           {currentStep === 2 && (
@@ -355,6 +404,33 @@ export default function ConsultationForm() {
           value={formData.hp_field}
           onChange={(e) => setFormData({...formData, hp_field: e.target.value})}
         />
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
+        {/* Back to Top */}
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className={`p-4 bg-white text-black border-2 border-black rounded-full shadow-2xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+          title="Kembali ke Atas"
+        >
+          <ChevronUp className="w-6 h-6" strokeWidth={2.5} />
+        </button>
+
+        {/* WhatsApp Button */}
+        <a
+          href={generateWhatsAppLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-4 bg-[#25D366] text-white rounded-full shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_25px_-5px_rgba(37,211,102,0.5)] active:scale-95 flex items-center justify-center group relative"
+          title="Konsultasi via WhatsApp"
+        >
+          <MessageCircle className="w-6 h-6 fill-white" />
+          <span className="absolute right-full mr-4 px-3 py-1.5 bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Chat WhatsApp
+          </span>
+        </a>
       </div>
     </form>
   );
