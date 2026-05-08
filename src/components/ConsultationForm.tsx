@@ -279,6 +279,25 @@ export default function ConsultationForm() {
     }
   };
 
+  const handleResetForm = () => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus semua isian dan mulai dari awal?')) {
+      localStorage.removeItem('consultationFormProgress');
+      setFormData({
+        clientName: '', clientEmail: '', clientPhone: '', jobTitle: '',
+        websiteType: '', otherWebsiteType: '', techStack: '', designStyle: '', primaryColor: '', customColor: '',
+        logoStatus: '', logoNotes: '', contentStatus: '', contentNotes: '', preferredFont: '', 
+        hostingStatus: '', hostingPlan: '',
+        domainStatus: '', domainName: '', domainExt: '.com', emailStatus: '',
+        elements: [], ecommerceFeatures: [], securityFeatures: [], features: [], marketingOptions: [],
+        budget: '', handoverFormat: '', referenceUrl: '', proposalLink: '', 
+        logoUrl: '', contentUrl: '', additionalNotes: '', hp_field: ''
+      });
+      setUserAnswer('');
+      setCurrentStep(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="max-w-6xl mx-auto py-12 px-4">
       <div className="space-y-12">
@@ -379,24 +398,33 @@ export default function ConsultationForm() {
               Kembali
             </button>
           )}
-          
-          {currentStep < totalSteps ? (
+          <div className="flex items-center gap-4 ml-auto">
             <button
               type="button"
-              onClick={nextStep}
-              className="ml-auto px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              onClick={handleResetForm}
+              className="px-4 py-2 text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors"
             >
-              Lanjut
+              Mulai Dari Awal
             </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="ml-auto px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 active:scale-95"
-            >
-              {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
-            </button>
-          )}
+
+            {currentStep < totalSteps ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              >
+                Lanjut
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 active:scale-95"
+              >
+                {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
+              </button>
+            )}
+          </div>
         </div>
 
         <StatusModal 
