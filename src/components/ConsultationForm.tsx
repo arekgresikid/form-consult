@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckSquare, Square, Info, Newspaper } from 'lucide-react';
+import StatusModal from './StatusModal';
 
 const InfoTooltip = ({ text }: { text: React.ReactNode }) => (
   <div className="group relative inline-flex items-center ml-2 align-middle">
@@ -41,8 +42,32 @@ export default function ConsultationForm() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'loading';
+    title: string;
+    message: React.ReactNode;
+  }>({
+    isOpen: false,
+    type: 'loading',
+    title: '',
+    message: ''
+  });
+
+  const showModal = (type: 'success' | 'error' | 'loading', title: string, message: React.ReactNode) => {
+    setModalConfig({ isOpen: true, type, title, message });
+  };
+
+  React.useEffect(() => {
+    (window as any).onTurnstileSuccess = (token: string) => {
+      setTurnstileToken(token);
+    };
+    return () => {
+      delete (window as any).onTurnstileSuccess;
+    };
+  }, []);
 
   const handleArrayToggle = (field: keyof typeof formData, value: string) => {
     setFormData(prev => {
@@ -68,7 +93,7 @@ export default function ConsultationForm() {
     if (!formData.websiteType) newErrors.websiteType = 'Silakan pilih jenis website yang ingin dibangun.';
     if (formData.websiteType === 'lainnya' && !formData.otherWebsiteType) newErrors.otherWebsiteType = 'Silakan jelaskan jenis website Anda.';
     
-    if (!formData.techStack) newErrors.techStack = 'Silakan pilih platform atau teknologi yang diinginkan.';
+    if (formData.websiteType !== 'paket_murah' && !formData.techStack) newErrors.techStack = 'Silakan pilih platform atau teknologi yang diinginkan.';
 
     if (formData.domainStatus === 'Belum Punya (Bantu Belikan)' && !formData.domainName) {
       newErrors.domainName = 'Nama domain tidak boleh kosong.';
@@ -86,33 +111,43 @@ export default function ConsultationForm() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // Scroll to top or show alert so user knows there are errors
-      alert('Terdapat kesalahan atau kolom yang belum diisi. Silakan periksa kembali formulir Anda.');
+      const errorList = Object.values(newErrors).map((err, i) => (
+        <div key={i} className="flex items-start gap-2 text-left">
+          <span>•</span> <span>{err}</span>
+        </div>
+      ));
+      showModal('error', 'Formulir Belum Lengkap', <div className="space-y-1 mt-2">{errorList}</div>);
+      return;
+    }
+
+    if (!turnstileToken && import.meta.env.PROD) {
+      showModal('error', 'Keamanan Diperlukan', 'Silakan selesaikan verifikasi keamanan (Turnstile) sebelum mengirim.');
       return;
     }
 
     setErrors({});
     setIsSubmitting(true);
+    showModal('loading', 'Sedang Mengirim...', 'Mohon tunggu sebentar, formulir Anda sedang kami proses.');
     
     try {
       const response = await fetch('/api/submit-consultation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, turnstileToken })
       });
-      
-      const result = await response.json();
+            const result = await response.json();
       if (result.success) {
-        alert('Terima kasih! Formulir konsultasi Anda telah berhasil dikirim ke email.');
+        showModal('success', 'Berhasil Terkirim!', 'Terima kasih! Formulir konsultasi Anda telah berhasil kami terima. Kami akan segera menghubungi Anda.');
       } else {
-        alert('Gagal mengirim formulir: ' + (result.message || 'Terjadi kesalahan sistem.'));
+        showModal('error', 'Gagal Mengirim', result.message || 'Terjadi kesalahan sistem saat mencoba mengirim data.');
       }
     } catch (error) {
       console.error(error);
-      alert('Gagal mengirim formulir. Pastikan Anda telah mengatur Environment Variable EMAIL_USER dan EMAIL_APP_PASSWORD.');
+      showModal('error', 'Kesalahan Koneksi', 'Gagal terhubung ke server. Pastikan koneksi internet Anda stabil.');
     } finally {
       setIsSubmitting(false);
     }
+
   };
 
   return (
@@ -1006,8 +1041,19 @@ export default function ConsultationForm() {
         </div>
       </section>
 
+      {/* Turnstile Widget (Only in Production) */}
+      {import.meta.env.PROD && (
+        <div className="pt-8 flex justify-center md:justify-start">
+          <div 
+            className="cf-turnstile" 
+            data-sitekey="0x4AAAAAABh0uR4HC9nKVVTQ"
+            data-callback="onTurnstileSuccess"
+          ></div>
+        </div>
+      )}
+
       {/* Submit Button */}
-      <div className="pt-8 border-t border-gray-200">
+      <div className="pt-4 border-t border-gray-200">
         <button
           type="submit"
           disabled={isSubmitting}
@@ -1016,6 +1062,13 @@ export default function ConsultationForm() {
           {isSubmitting ? 'Mengirim...' : 'Kirim Form Konsultasi'}
         </button>
       </div>
+      <StatusModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+      />
     </form>
   );
 }

@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
+import "dotenv/config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,8 +16,33 @@ async function startServer() {
 
   app.post("/api/submit-consultation", async (req, res) => {
     try {
-      const formData = req.body;
+      const { turnstileToken, ...formData } = req.body;
       
+      const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+      if (!turnstileSecret) {
+        console.error("TURNSTILE_SECRET_KEY is missing in environment");
+        return res.status(500).json({ success: false, message: "Server security not configured." });
+      }
+
+      // Verify Turnstile Token (Bypass in development)
+      if (process.env.NODE_ENV === 'production') {
+        const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: turnstileSecret,
+            response: turnstileToken,
+          }),
+        });
+
+        const verifyData: any = await verifyResponse.json();
+        if (!verifyData.success) {
+          return res.status(400).json({ success: false, message: "Gagal verifikasi keamanan (Turnstile)." });
+        }
+      } else {
+        console.log("Turnstile verification bypassed (Development Mode)");
+      }
+
       const emailUser = process.env.EMAIL_USER;
       const emailPass = process.env.EMAIL_APP_PASSWORD;
 
@@ -31,6 +57,15 @@ async function startServer() {
           pass: emailPass,
         },
       });
+
+      // Verify connection configuration
+      try {
+        await transporter.verify();
+        console.log("Transporter is ready to take our messages");
+      } catch (verifyError) {
+        console.error("Transporter verification failed:", verifyError);
+        return res.status(500).json({ success: false, message: "Server email configuration is invalid." });
+      }
 
       const mailOptions = {
         from: emailUser,
