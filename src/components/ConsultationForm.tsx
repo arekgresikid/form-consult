@@ -109,6 +109,16 @@ export default function ConsultationForm() {
     generateChallenge();
   }, [currentStep]);
 
+  // Prevent auto-focus and keyboard jump on mobile when switching steps
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Explicitly blur any active element to prevent keyboard from popping up
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [currentStep]);
+
   useEffect(() => {
     const saved = localStorage.getItem('consultationFormProgress');
     if (saved) {
@@ -343,12 +353,15 @@ export default function ConsultationForm() {
               <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                 <span className="text-lg font-bold text-black min-w-[60px] text-center">{mathChallenge.a} + {mathChallenge.b} =</span>
                 <input 
-                  type="number" 
+                  type="text" 
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="?"
                   value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
+                  onChange={(e) => setUserAnswer(e.target.value.replace(/[^0-9]/g, ''))}
                   className="w-20 bg-gray-50 border-2 border-transparent focus:border-black rounded-lg py-2 px-3 text-center font-bold text-lg focus:outline-none transition-all"
                   required
+                  autoComplete="off"
                 />
               </div>
             </div>
