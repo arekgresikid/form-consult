@@ -69,43 +69,87 @@ const Step5: React.FC<Step5Props> = ({
             9. Elemen & Komponen yang Diinginkan
             <InfoTooltip text="Pilih blok atau komponen apa saja yang sifatnya wajib ada pada halaman website Anda nantinya." />
           </h2>
-          <p className="text-sm text-gray-500">Pilih bagian apa saja yang ingin ditampilkan di dalam website Anda.</p>
+          <p className="text-sm text-gray-500">Pilih bagian apa saja yang ingin ditampilkan di dalam website Anda. Semakin banyak komponen, struktur website akan semakin lengkap.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
-            { id: 'menu', label: 'Menu & Submenu Navigasi', desc: 'Misal: Tombol di atas (Beranda, Layanan) yang kalau diklik muncul menu ke bawah.', icon: <Layout className="w-5 h-5" /> },
-            { id: 'slider', label: 'Slider & Banner Gambar', desc: 'Gambar besar di halaman depan yang otomatis bergeser seperti papan reklame.', icon: <Image className="w-5 h-5" /> },
-            { id: 'galeri', label: 'Galeri Foto & Portfolio', desc: 'Kumpulan foto produk atau kegiatan yang bisa diklik untuk diperbesar ukurannya.', icon: <Image className="w-5 h-5" /> },
-            { id: 'blog', label: 'Halaman Blog', desc: 'Seperti koran online. Tempat Anda menulis kabar, promo, atau artikel terbaru.', icon: <Newspaper className="w-5 h-5" /> },
-            { id: 'modal', label: 'Modal / Popup Promo', desc: 'Jendela kecil yang tiba-tiba muncul di tengah layar saat web pertama kali dibuka.', icon: <Sparkles className="w-5 h-5" /> },
-            { id: 'form-kontak', label: 'Buku Tamu / Form Kontak', desc: 'Kotak isian agar pelanggan bisa kirim pesan langsung dari website Anda.', icon: <FileText className="w-5 h-5" /> },
-            { id: 'halaman-kontak', label: 'Halaman Kontak & Peta', desc: 'Berisi info nomor HP, jam buka, dan tempelan jalur langsung ke aplikasi Google Maps.', icon: <Globe className="w-5 h-5" /> },
-            { id: 'testimoni', label: 'Testimoni Pelanggan', desc: 'Kutipan pujian dan bintang lima dari pembeli untuk meyakinkan pengunjung baru.', icon: <Users className="w-5 h-5" /> },
-            { id: 'footer', label: 'Footer (Bagian Bawah)', desc: 'Bagian dasar website. Biasanya isinya link media sosial, syarat ketentuan, dan alamat.', icon: <Layout className="w-5 h-5" /> },
-            { id: 'dashboard', label: 'Dashboard Admin', desc: '(Hanya bila perlu) Halaman "rahasia" untuk Anda login dan mengubah foto sendiri.', icon: <ShieldCheck className="w-5 h-5" /> },
-            { id: 'tabel', label: 'Tabel Paket Harga (Pricing)', desc: 'Tampilan perbandingan harga dan fitur produk Anda dalam kolom-kolom rapi.', icon: <BarChart3 className="w-5 h-5" /> },
-            { id: 'faq', label: 'Tanya Jawab (FAQ)', desc: 'Daftar pertanyaan berulang dari pelanggan yang jawabannya bisa ditekan buka-tutup.', icon: <MessageCircle className="w-5 h-5" /> }
+            { id: 'hero', label: 'Hero Section (Headline)', desc: 'Bagian paling atas dengan judul besar, teks pembuka, dan tombol utama (CTA).', icon: <Target className="w-5 h-5" /> },
+            { id: 'menu', label: 'Menu & Navigasi', desc: 'Baris navigasi di atas untuk pindah antar halaman atau bagian website.', icon: <Layout className="w-5 h-5" /> },
+            { id: 'slider', label: 'Slider / Carousel', desc: 'Banner gambar yang bisa bergeser otomatis untuk menampilkan promo atau foto utama.', icon: <Image className="w-5 h-5" /> },
+            { id: 'services', label: 'Grid Layanan / Produk', desc: 'Penjelasan singkat apa yang Anda tawarkan dalam bentuk kolom-kolom ikon/gambar.', icon: <Layout className="w-5 h-5" /> },
+            { id: 'steps', label: 'Alur Kerja (Step-by-Step)', desc: 'Urutan langkah cara kerja atau proses pemesanan (1, 2, 3).', icon: <CheckSquare className="w-5 h-5" /> },
+            { id: 'galeri', label: 'Galeri & Portfolio', desc: 'Kumpulan foto hasil karya atau dokumentasi kegiatan yang bisa diklik.', icon: <Image className="w-5 h-5" /> },
+            { id: 'blog', label: 'Halaman Berita / Blog', desc: 'Area untuk memposting artikel, tips, atau kabar terbaru dari perusahaan.', icon: <Newspaper className="w-5 h-5" /> },
+            { id: 'testimoni', label: 'Testimoni & Review', desc: 'Kutipan kepuasan pelanggan beserta foto/nama untuk membangun kepercayaan.', icon: <Users className="w-5 h-5" /> },
+            { id: 'pricing', label: 'Tabel Harga (Pricing)', desc: 'Perbandingan paket harga yang rapi agar klien mudah memilih layanan.', icon: <BarChart3 className="w-5 h-5" /> },
+            { id: 'partners', label: 'Logo Partner / Klien', desc: 'Barisan logo perusahaan atau brand yang pernah bekerja sama.', icon: <ShieldCheck className="w-5 h-5" /> },
+            { id: 'stats', label: 'Statistik & Counter', desc: 'Angka keberhasilan (misal: 500+ Klien) yang bisa bergerak saat dilihat.', icon: <Target className="w-5 h-5" /> },
+            { id: 'team', label: 'Profil Tim / Founder', desc: 'Foto dan penjelasan singkat mengenai orang-orang di balik bisnis Anda.', icon: <Users className="w-5 h-5" /> },
+            { id: 'faq', label: 'Tanya Jawab (FAQ)', desc: 'Daftar pertanyaan yang sering diajukan dengan sistem buka-tutup (accordion).', icon: <MessageCircle className="w-5 h-5" /> },
+            { id: 'form-kontak', label: 'Formulir Kontak', desc: 'Isian Nama/Email agar pengunjung bisa kirim pesan langsung ke email Anda.', icon: <FileText className="w-5 h-5" /> },
+            { id: 'maps', label: 'Peta Lokasi (Google Maps)', desc: 'Peta interaktif agar pelanggan mudah menemukan alamat fisik Anda.', icon: <Globe className="w-5 h-5" /> },
+            { id: 'newsletter', label: 'Newsletter Subscription', desc: 'Kotak langganan email untuk pengumpulan database calon pelanggan.', icon: <FileText className="w-5 h-5" /> },
+            { id: 'social-feed', label: 'Social Media Feed', desc: 'Tampilan otomatis postingan terbaru dari Instagram atau TikTok Anda.', icon: <Share2 className="w-5 h-5" /> },
+            { id: 'footer', label: 'Footer Lengkap', desc: 'Bagian paling bawah berisi alamat, link sosmed, dan hak cipta.', icon: <Layout className="w-5 h-5" /> }
           ].map(item => (
-            <label key={item.id} className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
-              <div onClick={() => handleElementToggle(item.label)} className="text-gray-300 group-hover:text-black transition-colors mt-0.5 shrink-0">
+            <label 
+              key={item.id} 
+              className={`flex items-start gap-4 p-5 border rounded-2xl cursor-pointer transition-all duration-300 group ${formData.elements.includes(item.label) ? 'border-black bg-black/5 shadow-sm' : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}`}
+            >
+              <div 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleElementToggle(item.label);
+                }} 
+                className={`mt-1 shrink-0 transition-transform duration-300 ${formData.elements.includes(item.label) ? 'scale-110' : 'group-hover:scale-110'}`}
+              >
                 {formData.elements.includes(item.label) 
-                  ? <CheckSquare className="text-black w-5 h-5" strokeWidth={1.5} />
-                  : <Square className="w-5 h-5" strokeWidth={1.5} />
+                  ? <CheckSquare className="text-black w-6 h-6" strokeWidth={2.5} />
+                  : <Square className="text-gray-300 w-6 h-6" strokeWidth={2} />
                 }
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1.5">
                   <div className={`${formData.elements.includes(item.label) ? 'text-black' : 'text-gray-400'}`}>
                     {item.icon}
                   </div>
-                  <span className="font-medium text-black text-sm">{item.label}</span>
+                  <span className={`font-bold text-sm tracking-tight ${formData.elements.includes(item.label) ? 'text-black' : 'text-gray-700'}`}>
+                    {item.label}
+                  </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+                <p className={`text-[11px] leading-relaxed ${formData.elements.includes(item.label) ? 'text-gray-900' : 'text-gray-500'}`}>
+                  {item.desc}
+                </p>
               </div>
             </label>
           ))}
         </div>
+
+        {/* Real-time Visual Flow Preview */}
+        {formData.elements.length > 0 && (
+          <div className="mt-10 p-8 bg-gray-50 border border-dashed border-gray-300 rounded-3xl animate-in fade-in zoom-in duration-500">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 text-center">Estimasi Alur Halaman Website Anda</h3>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {formData.elements.map((el: string, index: number) => (
+                <React.Fragment key={el}>
+                  <div className="px-5 py-3 bg-white border border-black/10 rounded-xl shadow-sm flex items-center gap-2 group hover:border-black transition-all">
+                    <div className="w-2 h-2 rounded-full bg-black"></div>
+                    <span className="text-xs font-bold text-black uppercase tracking-tight">{el}</span>
+                  </div>
+                  {index < formData.elements.length - 1 && (
+                    <div className="text-gray-300">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                      </svg>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <p className="text-[10px] text-gray-400 mt-8 text-center italic">*Urutan komponen dapat disesuaikan kembali saat proses desain berlangsung.</p>
+          </div>
+        )}
       </section>
 
       {/* 10. Pembayaran & Transaksi */}
@@ -310,53 +354,82 @@ const Step5: React.FC<Step5Props> = ({
         </div>
       </section>
 
-      {/* 15. Serah Terima */}
+      {/* 15. Serah Terima & Panduan Penggunaan */}
       <section>
-        <div className="mb-6">
+        <div className="mb-8">
           <h2 className="text-xl font-medium tracking-tight mb-2 flex items-center">
             15. Serah Terima & Panduan Penggunaan
-            <InfoTooltip text="Karena ini merupakan aset sepenuhnya milik Anda, kami menjamin penyerahan akses secara terbuka tanpa ada batasan untuk Anda ambil alih." />
+            <InfoTooltip text="Kami memastikan Anda tidak hanya menerima website, tapi juga tahu cara mengoperasikannya secara mandiri." />
           </h2>
-          <p className="text-sm text-gray-500">Agar Anda tidak kebingungan saat mengelola website nanti.</p>
+          <p className="text-sm text-gray-500">Pilih bagaimana Anda ingin kami membekali Anda agar mahir mengelola website sendiri.</p>
         </div>
 
         {formData.hostingStatus === 'terima_beres' || formData.domainStatus === 'Belum Punya (Bantu Belikan)' ? (
-          <div className="mb-6 p-5 bg-blue-50/50 border border-blue-100 rounded-xl">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Penting Seputar Opsi "Terima Beres"</h4>
-            <p className="text-xs text-blue-800 leading-relaxed">
-              Karena Anda memilih agar kami mengurus Hosting/Domain Anda, kami akan membuatkan <b>email dan akun pendaftaran yang benar-benar baru & khusus</b> atas nama Anda. 
-              Semua hak akses, username, and password akan diserahkan 100% kepada Anda setelah website selesai. Kami tidak menahan kepemilikan aset digital Anda.
-            </p>
+          <div className="mb-8 p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+            <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-blue-900 mb-1">Jaminan Kepemilikan Aset</h4>
+              <p className="text-xs text-blue-800/80 leading-relaxed">
+                Semua akun pendaftaran (Hosting/Domain) akan menggunakan data Anda dan diserahkan 100% (Username & Password). Kami tidak menahan kepemilikan aset digital Anda.
+              </p>
+            </div>
           </div>
         ) : null}
 
-        <h4 className="text-sm font-medium mb-3">Bagaimana Anda ingin menerima panduan cara pakai website Anda?</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           {[
-            { id: 'pdf', label: 'Buku Panduan PDF', desc: 'Bisa didownload dan dibaca kapan saja secara offline.', icon: <FileText className="w-5 h-5" /> },
-            { id: 'web', label: 'Halaman Panduan Khusus', desc: 'Panduan rahasia beserta video di dalam website Anda sendiri.', icon: <Globe className="w-5 h-5" /> },
-            { id: 'video', label: 'Panggilan Video (Zoom/GMeet)', desc: 'Meeting langsung agar bisa tanya jawab secara riil.', icon: <Video className="w-5 h-5" /> }
+            { id: 'pdf', label: 'E-Book Panduan (PDF)', desc: 'Dokumen tertulis dengan screenshot langkah demi langkah. Cocok untuk dibaca santai.', icon: <FileText className="w-5 h-5" /> },
+            { id: 'video_recorded', label: 'Video Tutorial Eksklusif', desc: 'Rekaman layar khusus menjelaskan cara ganti tulisan, gambar, dan posting blog.', icon: <Video className="w-5 h-5" /> },
+            { id: 'zoom', label: 'Live Training (Multi-Platform)', desc: 'Sesi privat via Zoom, Meet, WhatsApp, Email, atau Messenger untuk tanya jawab riil.', icon: <Users className="w-5 h-5" /> },
+            { id: 'web_guide', label: 'Halaman Panduan di Web', desc: 'Dibuatkan halaman khusus "Cara Pakai" yang hanya bisa diakses oleh Anda di dalam web.', icon: <Globe className="w-5 h-5" /> },
+            { id: 'maintenance', label: 'Dukungan & Perawatan (1 Bulan)', desc: 'Bantuan teknis gratis selama 30 hari pertama setelah serah terima selesai.', icon: <Server className="w-5 h-5" /> }
           ].map(item => (
-             <label key={item.id} className={`flex flex-col p-4 border rounded-xl cursor-pointer transition-all ${formData.handoverFormat === item.id ? 'border-black bg-black text-white' : 'border-gray-200 text-black hover:border-gray-400 bg-white'}`}>
-              <div className="flex items-center gap-3 mb-2">
-                 <input 
+            <label 
+              key={item.id} 
+              className={`flex items-start gap-4 p-5 border rounded-2xl cursor-pointer transition-all ${formData.handoverFormat === item.id ? 'border-black bg-black text-white shadow-xl translate-y-[-2px]' : 'border-gray-100 bg-white hover:border-gray-300'}`}
+            >
+              <div className="mt-1">
+                <input 
                   type="radio" 
                   name="handoverFormat" 
                   value={item.id}
                   checked={formData.handoverFormat === item.id}
                   onChange={(e) => setFormData({...formData, handoverFormat: e.target.value})}
-                  className={`w-4 h-4 border-gray-300 focus:ring-black accent-black ${formData.handoverFormat === item.id ? 'accent-white' : ''}`}
+                  className={`w-4 h-4 accent-white ${formData.handoverFormat === item.id ? '' : 'accent-black'}`}
                 />
-                <div className="flex items-center gap-2">
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <div className={`${formData.handoverFormat === item.id ? 'text-white' : 'text-gray-400'}`}>
                     {item.icon}
                   </div>
-                  <span className="font-medium text-sm">{item.label}</span>
+                  <span className="font-bold text-sm">{item.label}</span>
                 </div>
+                <p className={`text-[11px] leading-relaxed ${formData.handoverFormat === item.id ? 'text-gray-300' : 'text-gray-500'}`}>{item.desc}</p>
               </div>
-              <p className={`text-xs pl-7 ${formData.handoverFormat === item.id ? 'text-gray-300' : 'text-gray-500'}`}>{item.desc}</p>
             </label>
           ))}
+        </div>
+
+        <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Daftar Paket Serah Terima Standar:</h4>
+           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                'Akses Full Panel Hosting & Domain',
+                'Kredensial Login Admin Website',
+                'File Source Code (Format .zip)',
+                'Aset Gambar & Ikon Original',
+                'Akun Email Bisnis (Bila Dipesan)',
+                'Sertifikat Lisensi Aset (Bila Ada)'
+              ].map(check => (
+                <li key={check} className="flex items-center gap-2 text-xs text-gray-600">
+                  <CheckSquare className="w-4 h-4 text-green-500" />
+                  {check}
+                </li>
+              ))}
+           </ul>
         </div>
       </section>
 
