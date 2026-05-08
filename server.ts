@@ -17,7 +17,7 @@ async function startServer() {
   app.post("/api/submit-consultation", async (req, res) => {
     try {
       const { turnstileToken, ...formData } = req.body;
-      
+
       const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
       if (!turnstileSecret) {
         console.error("TURNSTILE_SECRET_KEY is missing in environment");
@@ -67,12 +67,43 @@ async function startServer() {
         return res.status(500).json({ success: false, message: "Server email configuration is invalid." });
       }
 
+      const generateEmailHTML = (data: any) => {
+        const rows = Object.entries(data)
+          .map(([key, value]) => {
+            if (!value || (Array.isArray(value) && value.length === 0)) return '';
+            return `
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: bold; color: #555; width: 35%; text-transform: capitalize;">${key.replace(/([A-Z])/g, ' $1')}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; color: #000;">${Array.isArray(value) ? value.join(', ') : value}</td>
+              </tr>
+            `;
+          }).join('');
+
+        return `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; background: #ffffff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div style="background: #000000; padding: 40px 20px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 300; letter-spacing: -0.5px;">Arif Tirtana <span style="font-weight: 700;">Consultation</span></h1>
+              <p style="color: #94a3b8; margin-top: 8px; font-size: 14px;">Pesanan Konsultasi Website Baru Terdeteksi</p>
+            </div>
+            <div style="padding: 32px;">
+              <h2 style="font-size: 18px; color: #1a202c; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 8px; display: inline-block; font-weight: 600;">Data Klien & Proyek</h2>
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                ${rows}
+              </table>
+              <div style="margin-top: 40px; padding: 24px; background: #f8fafc; border-radius: 16px; text-align: center;">
+                <p style="margin: 0; color: #64748b; font-size: 12px; line-height: 1.6;">Email ini dikirim secara otomatis oleh Sistem Konsultasi Arif Tirtana.<br/>Segera hubungi klien dalam waktu 1x24 jam.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
       const mailOptions = {
         from: emailUser,
         to: 'ayicktigabelas@gmail.com',
-        subject: 'Form Konsultasi Website Baru',
+        subject: `🚀 Proyek Baru: ${formData.clientName || 'Klien'} - ${formData.websiteType || 'Web'}`,
         text: `Data Konsultasi Website Baru:\n\n${JSON.stringify(formData, null, 2)}`,
-        html: `<h3>Data Konsultasi Website Baru</h3><pre>${JSON.stringify(formData, null, 2)}</pre>`
+        html: generateEmailHTML(formData)
       };
 
       await transporter.sendMail(mailOptions);

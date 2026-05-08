@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Skypilar", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
   --font-mono: "Inter", monospace;
   
   --animate-shimmer: shimmer 2s infinite;
@@ -11,5 +11,24 @@
     100% {
       transform: translateX(100%);
     }
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply bg-white text-black antialiased;
+  }
+
+  ::selection {
+    @apply bg-black text-white;
   }
 }

@@ -29,7 +29,7 @@ export default function StatusModal({ isOpen, onClose, type, title, message }: S
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100"
+            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 pointer-events-auto"
           >
             <div className="p-8">
               {/* Icon */}
@@ -63,8 +63,12 @@ export default function StatusModal({ isOpen, onClose, type, title, message }: S
               {type !== 'loading' && (
                 <div className="mt-8">
                   <button
-                    onClick={onClose}
-                    className="w-full py-4 bg-black text-white rounded-2xl font-medium tracking-wide hover:bg-gray-800 transition-colors shadow-lg shadow-black/10"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose();
+                    }}
+                    className="w-full py-4 bg-black text-white rounded-2xl font-medium tracking-wide hover:bg-gray-800 transition-all shadow-lg shadow-black/10 active:scale-95"
                   >
                     Tutup
                   </button>
@@ -75,6 +79,7 @@ export default function StatusModal({ isOpen, onClose, type, title, message }: S
             {/* Close icon for non-loading */}
             {type !== 'loading' && (
               <button
+                type="button"
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-black transition-colors"
               >
