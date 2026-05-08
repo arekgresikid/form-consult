@@ -398,15 +398,7 @@ export default function ConsultationForm() {
               Kembali
             </button>
           )}
-          <div className="flex items-center gap-4 ml-auto">
-            <button
-              type="button"
-              onClick={handleResetForm}
-              className="px-4 py-2 text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors"
-            >
-              Mulai Dari Awal
-            </button>
-
+          <div className="flex flex-col items-end ml-auto">
             {currentStep < totalSteps ? (
               <button
                 type="button"
@@ -424,6 +416,14 @@ export default function ConsultationForm() {
                 {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={handleResetForm}
+              className="mt-4 px-4 py-2 text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors"
+            >
+              Mulai Dari Awal
+            </button>
           </div>
         </div>
 
