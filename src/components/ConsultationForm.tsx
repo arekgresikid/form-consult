@@ -398,33 +398,34 @@ export default function ConsultationForm() {
               Kembali
             </button>
           )}
-          <div className="flex flex-col items-end ml-auto">
-            {currentStep < totalSteps ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
-              >
-                Lanjut
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 active:scale-95"
-              >
-                {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
-              </button>
-            )}
-
+          {currentStep < totalSteps ? (
             <button
               type="button"
-              onClick={handleResetForm}
-              className="mt-4 px-4 py-2 text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors"
+              onClick={nextStep}
+              className="ml-auto px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
             >
-              Mulai Dari Awal
+              Lanjut
             </button>
-          </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="ml-auto px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 active:scale-95"
+            >
+              {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
+            </button>
+          )}
+        </div>
+
+        {/* Footer Reset Button */}
+        <div className="pt-20 pb-8 flex justify-center">
+          <button
+            type="button"
+            onClick={handleResetForm}
+            className="px-6 py-2 text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-all opacity-40 hover:opacity-100 tracking-[0.2em]"
+          >
+            — Mulai Dari Awal (Reset Form) —
+          </button>
         </div>
 
         <StatusModal 
