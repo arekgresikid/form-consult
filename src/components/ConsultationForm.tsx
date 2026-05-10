@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import StatusModal from './StatusModal';
 
 // Modular Step Components
@@ -9,7 +9,7 @@ import Step2 from './ConsultationForm/Step2';
 import Step3 from './ConsultationForm/Step3';
 import Step4 from './ConsultationForm/Step4';
 import Step5 from './ConsultationForm/Step5';
-import { ChevronUp, MessageCircle } from 'lucide-react';
+import { ChevronUp, MessageCircle, ChevronDown, User } from 'lucide-react';
 
 const steps = [
   { id: 1, label: 'Konsep' },
@@ -20,6 +20,7 @@ const steps = [
 ];
 
 export default function ConsultationForm() {
+  const topRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = steps.length;
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,16 +69,24 @@ export default function ConsultationForm() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [mathChallenge, setMathChallenge] = useState({ a: 0, b: 0, result: 0 });
-  const [userAnswer, setUserAnswer] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 400);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -100,18 +109,36 @@ export default function ConsultationForm() {
     return `https://wa.me/${number}?text=${message}`;
   };
 
-  useEffect(() => {
-    const generateChallenge = () => {
-      const a = Math.floor(Math.random() * 10) + 1;
-      const b = Math.floor(Math.random() * 10) + 1;
-      setMathChallenge({ a, b, result: a + b });
-    };
-    generateChallenge();
-  }, [currentStep]);
+  // Initialize Turnstile widget when reaching Step 5
+  useLayoutEffect(() => {
+    if (currentStep === totalSteps && (window as any).turnstile) {
+      const container = document.getElementById('turnstile-container');
+      if (container && container.innerHTML === '') {
+        (window as any).turnstile.render('#turnstile-container', {
+          sitekey: '0x4AAAAAABh0uR4HC9nKVVTQ',
+          callback: (token: string) => {
+            setTurnstileToken(token);
+          },
+          'error-callback': () => {
+            setTurnstileToken('');
+          },
+          'expired-callback': () => {
+            setTurnstileToken('');
+          },
+        });
+      }
+    }
+  }, [currentStep, totalSteps]);
 
   // Prevent auto-focus and keyboard jump on mobile when switching steps
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  useLayoutEffect(() => {
+    // Immediate scroll to top using multiple methods for reliability
+    window.scrollTo(0, 0);
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     
     // Explicitly blur any active element to prevent keyboard from popping up
     if (document.activeElement instanceof HTMLElement) {
@@ -126,6 +153,7 @@ export default function ConsultationForm() {
         const parsed = JSON.parse(saved);
         setFormData(prev => ({ ...prev, ...parsed.data }));
         setCurrentStep(parsed.step || 1);
+        if (parsed.aiAnalysis) setAiAnalysis(parsed.aiAnalysis);
       } catch (e) {
         console.error('Error loading saved progress');
       }
@@ -135,9 +163,38 @@ export default function ConsultationForm() {
   useEffect(() => {
     localStorage.setItem('consultationFormProgress', JSON.stringify({
       data: formData,
-      step: currentStep
+      step: currentStep,
+      aiAnalysis // Save AI analysis too
     }));
-  }, [formData, currentStep]);
+  }, [formData, currentStep, aiAnalysis]);
+
+  const handleAIAnalyze = async () => {
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/ai-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formData })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAiAnalysis(data.analysis);
+        // Scroll to the AI strategy section
+        setTimeout(() => {
+          const section = document.getElementById('ai-strategy');
+          if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err: any) {
+      alert('Gagal melakukan analisis AI: ' + err.message);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const validateStep = () => {
     return true; // All fields optional as requested
@@ -146,18 +203,32 @@ export default function ConsultationForm() {
   const nextStep = () => {
     if (validateStep()) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Force scroll to top after state change
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
     }
   };
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Force scroll to top after state change
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
   };
 
   const handleStepJump = (step: number) => {
     setCurrentStep(step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
   };
 
   const handleModuleToggle = (field: string, value: string) => {
@@ -220,18 +291,12 @@ export default function ConsultationForm() {
       return;
     }
 
-    if (parseInt(userAnswer) !== mathChallenge.result) {
-      // Generate new challenge if wrong
-      const a = Math.floor(Math.random() * 10) + 1;
-      const b = Math.floor(Math.random() * 10) + 1;
-      setMathChallenge({ a, b, result: a + b });
-      setUserAnswer('');
-
+    if (!turnstileToken) {
       setModalConfig({
         isOpen: true,
         type: 'error',
-        title: 'Jawaban Salah',
-        message: `Buktikan Anda manusia! Jawaban Anda salah. Coba lagi dengan soal baru ini.`
+        title: 'Verifikasi Gagal',
+        message: `Mohon selesaikan verifikasi keamanan (Turnstile) terlebih dahulu.`
       });
       return;
     }
@@ -241,7 +306,7 @@ export default function ConsultationForm() {
       const response = await fetch('/api/submit-consultation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
 
       if (response.ok) {
@@ -262,7 +327,7 @@ export default function ConsultationForm() {
             budget: '', handoverFormat: '', referenceUrl: '', proposalLink: '', 
             logoUrl: '', contentUrl: '', additionalNotes: '', hp_field: ''
         });
-        setUserAnswer('');
+        setTurnstileToken('');
         setCurrentStep(1);
       } else {
         throw new Error('Gagal mengirim form');
@@ -292,14 +357,16 @@ export default function ConsultationForm() {
         budget: '', handoverFormat: '', referenceUrl: '', proposalLink: '', 
         logoUrl: '', contentUrl: '', additionalNotes: '', hp_field: ''
       });
-      setUserAnswer('');
+      setTurnstileToken('');
       setCurrentStep(1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto py-12 px-4">
+    <>
+      <div ref={topRef} className="absolute top-0 left-0 w-1 h-1 opacity-0 pointer-events-none" />
+      <form onSubmit={handleSubmit} className="w-full py-12 px-4 sm:px-8 lg:px-12">
       <div className="space-y-12">
         
         <ProgressBar 
@@ -312,7 +379,32 @@ export default function ConsultationForm() {
         <div className="relative min-h-[400px]">
           {currentStep === 1 && (
             <div className="space-y-12">
-              <ContactInfo formData={formData} setFormData={setFormData} errors={errors} />
+              {/* Accordion for Contact Info */}
+              <div className="border border-gray-100 rounded-3xl overflow-hidden shadow-sm bg-white">
+                <button
+                  type="button"
+                  onClick={() => setIsContactOpen(!isContactOpen)}
+                  className="w-full flex items-center justify-between p-6 bg-gray-50 hover:bg-gray-100 transition-colors group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-lg">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-bold text-black text-sm uppercase tracking-widest">Informasi Kontak & Identitas</h3>
+                      <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">
+                        {isContactOpen ? 'Klik untuk sembunyikan' : 'Klik untuk lengkapi data diri Anda'}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-500 ${isContactOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isContactOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <ContactInfo formData={formData} setFormData={setFormData} errors={errors} />
+                </div>
+              </div>
+
               <div className="border-t border-gray-100 pt-12">
                 <Step1 
                   formData={formData} 
@@ -357,31 +449,23 @@ export default function ConsultationForm() {
               handleSecurityToggle={handleSecurityToggle}
               handleFeatureToggle={handleFeatureToggle}
               handleMarketingToggle={handleMarketingToggle}
+              handleAIAnalyze={handleAIAnalyze}
+              aiAnalysis={aiAnalysis}
+              isAnalyzing={isAnalyzing}
             />
           )}
         </div>
 
-        {/* Math Challenge Anti-Bot (Only on Last Step) */}
+        {/* Cloudflare Turnstile Anti-Bot (Only on Last Step) */}
         {currentStep === totalSteps && (
-          <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-1">Verifikasi Manusia</h4>
-                <p className="text-xs text-gray-500">Selesaikan penjumlahan sederhana ini untuk mengirim formulir.</p>
+          <div className="p-8 bg-gray-50 border border-gray-100 rounded-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="text-center md:text-left">
+                <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-2">Verifikasi Keamanan</h4>
+                <p className="text-xs text-gray-500 max-w-xs">Kami menggunakan Cloudflare Turnstile untuk memastikan Anda bukan robot.</p>
               </div>
-              <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                <span className="text-lg font-bold text-black min-w-[60px] text-center">{mathChallenge.a} + {mathChallenge.b} =</span>
-                <input 
-                  type="text" 
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="?"
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="w-20 bg-gray-50 border-2 border-transparent focus:border-black rounded-lg py-2 px-3 text-center font-bold text-lg focus:outline-none transition-all"
-                  required
-                  autoComplete="off"
-                />
+              <div id="turnstile-container" className="flex justify-center md:justify-end min-h-[65px] transition-all duration-300">
+                {/* Turnstile widget will be rendered here */}
               </div>
             </div>
           </div>
@@ -475,5 +559,6 @@ export default function ConsultationForm() {
         </a>
       </div>
     </form>
+    </>
   );
 }

@@ -7,12 +7,32 @@ app.use(express.json());
 
 app.post("/api/submit-consultation", async (req, res) => {
   try {
-    const { hp_field, ...formData } = req.body;
+    const { hp_field, turnstileToken, ...formData } = req.body;
 
     // Simple Anti-Bot: Honeypot field
     if (hp_field) {
       console.warn('Bot detected via honeypot field');
       return res.status(400).json({ success: false, message: "Aktivitas mencurigakan terdeteksi." });
+    }
+
+    // Cloudflare Turnstile Verification
+    if (!turnstileToken) {
+      return res.status(400).json({ success: false, message: "Verifikasi keamanan (Turnstile) diperlukan." });
+    }
+
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecret,
+        response: turnstileToken,
+      }),
+    });
+
+    const verifyData: any = await verifyResponse.json();
+    if (!verifyData.success) {
+      return res.status(400).json({ success: false, message: "Verifikasi keamanan gagal. Silakan coba lagi." });
     }
 
     const emailUser = process.env.EMAIL_USER;
@@ -74,6 +94,78 @@ app.post("/api/submit-consultation", async (req, res) => {
   } catch (error: any) {
     console.error('Error sending email:', error);
     res.status(500).json({ success: false, message: "Gagal mengirim email: " + error.message });
+  }
+});
+
+app.post("/api/ai-analyze", async (req, res) => {
+  try {
+    const { formData } = req.body;
+    const apiKey = process.env.AI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ success: false, message: "AI API key not configured." });
+    }
+
+    const prompt = `
+      Anda adalah Konsultan Strategi Digital Senior. 
+      Analisis data brief proyek berikut dan berikan:
+      1. Ringkasan singkat proyek.
+      2. 3 Rekomendasi teknis/fitur utama berdasarkan budget dan tujuan.
+      3. Estimasi tingkat kompleksitas (Rendah/Menengah/Tinggi).
+      4. Kata-kata motivasi penutup yang profesional.
+
+      DATA BRIEF:
+      - Nama Klien: ${formData.clientName || 'Tidak disebutkan'}
+      - Jenis Website: ${formData.websiteType || 'Tidak disebutkan'}
+      - Tech Stack: ${formData.techStack || 'Tidak disebutkan'}
+      - Gaya Desain: ${formData.designStyle || 'Tidak disebutkan'}
+      - Budget: ${formData.budget || 'Tidak disebutkan'}
+      - Fitur Utama: ${(formData.features || []).join(', ') || 'Tidak ada fitur spesifik'}
+      - Elemen: ${(formData.elements || []).join(', ') || 'Tidak ada elemen spesifik'}
+      - Catatan Tambahan: ${formData.additionalNotes || 'Tidak ada catatan tambahan'}
+
+      Gunakan bahasa Indonesia yang profesional, sangat ramah, dan meyakinkan. Gunakan analogi sederhana untuk menjelaskan fitur teknis. Format dalam Markdown.
+    `;
+
+    const response = await fetch("https://gen.pollinations.ai/text", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        messages: [
+          { 
+            role: "system", 
+            content: `Anda adalah Konsultan Digital & Website Strategist yang ramah, profesional, dan mampu menjelaskan istilah teknis dengan bahasa yang sangat mudah dimengerti (awam-friendly).
+            
+            Tujuan Anda: Membantu pengguna memahami apa yang mereka butuhkan untuk website mereka.
+            
+            ATURAN KHUSUS JIKA BRIEF KOSONG/MINIM:
+            1. Jangan hanya mengatakan data kosong. Berikan panduan "Mulai dari Mana".
+            2. Berikan 3 contoh jenis website populer (Landing Page, Company Profile, Toko Online) dan jelaskan kegunaannya secara sederhana.
+            3. Berikan saran langkah pertama yang harus mereka ambil (misal: menentukan tujuan utama).
+            4. Gunakan nada bicara yang menyemangati, bukan teknis yang membosankan.
+            
+            JIKA BRIEF ADA:
+            Jelaskan setiap rekomendasi fitur dengan analogi dunia nyata agar mudah dipahami oleh orang yang tidak mengerti IT.` 
+          },
+          { role: "user", content: prompt }
+        ],
+        seed: Math.floor(Math.random() * 1000000)
+      })
+    });
+
+    const content = await response.text();
+
+    if (!response.ok) {
+      throw new Error(content || "Gagal mendapatkan respon dari AI");
+    }
+
+    res.json({ success: true, analysis: content });
+  } catch (error: any) {
+    console.error('Error with AI analysis:', error);
+    res.status(500).json({ success: false, message: "Gagal melakukan analisis AI: " + error.message });
   }
 });
 

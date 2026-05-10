@@ -9,7 +9,7 @@ interface ContactInfoProps {
 
 const ContactInfo: React.FC<ContactInfoProps> = ({ formData, setFormData, errors }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-gray-50 rounded-3xl border border-gray-100">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
       <div className="space-y-6">
         <div>
           <label className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 block">

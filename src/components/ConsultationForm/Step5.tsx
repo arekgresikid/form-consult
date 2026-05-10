@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { 
   Layout, Share2, Server, ShieldCheck, Image, Newspaper, Sparkles, FileText, Globe, Users, 
-  BarChart3, MessageCircle, CheckSquare, Square, Search, Target, HelpCircle, Wallet, Video, Cpu
+  BarChart3, MessageCircle, CheckSquare, Square, Search, Target, HelpCircle, Wallet, Video, Cpu,
+  ChevronDown
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { InfoTooltip } from './Shared';
 
 interface Step5Props {
@@ -13,26 +15,62 @@ interface Step5Props {
   handleSecurityToggle: (id: string) => void;
   handleFeatureToggle: (label: string) => void;
   handleMarketingToggle: (id: string) => void;
+  handleAIAnalyze: () => void;
+  aiAnalysis: string;
+  isAnalyzing: boolean;
 }
 
 const Step5: React.FC<Step5Props> = ({ 
   formData, setFormData, 
   handleElementToggle, handleEcommerceToggle, handleSecurityToggle, 
-  handleFeatureToggle, handleMarketingToggle 
+  handleFeatureToggle, handleMarketingToggle,
+  handleAIAnalyze, aiAnalysis, isAnalyzing
 }) => {
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({});
+
+  const toggleSection = (id: string) => {
+    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+
+  const AccordionSection = ({ id, title, description, tooltip, children }: { id: string, title: string, description: string, tooltip: string, children: React.ReactNode }) => {
+    const isOpen = openSections[id];
+    return (
+      <section className="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm transition-all duration-300">
+        <button
+          type="button"
+          onClick={() => toggleSection(id)}
+          className="w-full flex items-center justify-between p-6 bg-gray-50 hover:bg-gray-100 transition-colors group"
+        >
+          <div className="text-left">
+            <h2 className="text-xl font-medium tracking-tight flex items-center gap-2">
+              {title}
+              <InfoTooltip text={tooltip} />
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">{description}</p>
+          </div>
+          <ChevronDown className={`w-6 h-6 text-gray-400 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100 p-8 pt-2' : 'max-h-0 opacity-0'}`}>
+          {children}
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="space-y-20">
+      {/* Existing sections... */}
+      {/* I will keep the existing sections as is and just add the new one at the end */}
+      {/* ... */}
       {/* 8. Email Bisnis Profesional */}
-      <section>
-        <div className="mb-10">
-          <h2 className="text-xl font-medium tracking-tight mb-4 flex items-center">
-            8. Email Bisnis Profesional
-            <InfoTooltip text="Memiliki email admin@brandanda.com memberikan kesan bahwa bisnis Anda serius. Membutuhkan pengaturan khusus di pengaturan domain." />
-          </h2>
-          <p className="text-sm text-gray-500">Buat klien Anda lebih percaya dengan menggunakan email berakhiran nama usaha Anda sendiri (misal: info@usahayanda.com).</p>
-        </div>
-
-        <div className="flex flex-col gap-4">
+      <AccordionSection
+        id="email"
+        title="8. Email Bisnis Profesional"
+        description="Buat klien Anda lebih percaya dengan menggunakan email berakhiran nama usaha Anda."
+        tooltip="Memiliki email admin@brandanda.com memberikan kesan bahwa bisnis Anda serius."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
             { id: 'gratis', label: 'Email Gratis (Gmail biasa)', desc: 'Menggunakan email seperti biasa, misal: usahaanda@gmail.com. Paling murah dan praktis.', icon: <Layout className="w-5 h-5" /> },
             { id: 'forwarding', label: 'Email Forwarding (Penerusan Email)', desc: 'Email masuk ke admin@brandanda.com otomatis diteruskan dan masuk kotak masuk Gmail pribadi Anda. Seringkali gratis menggunakan layanan pihak ketiga.', icon: <Share2 className="w-5 h-5" /> },
@@ -60,19 +98,16 @@ const Step5: React.FC<Step5Props> = ({
             </label>
           ))}
         </div>
-      </section>
+      </AccordionSection>
 
       {/* 9. Elemen & Komponen yang Diinginkan */}
-      <section>
-        <div className="mb-10">
-          <h2 className="text-xl font-medium tracking-tight mb-4 flex items-center">
-            9. Elemen & Komponen yang Diinginkan
-            <InfoTooltip text="Pilih blok atau komponen apa saja yang sifatnya wajib ada pada halaman website Anda nantinya." />
-          </h2>
-          <p className="text-sm text-gray-500">Pilih bagian apa saja yang ingin ditampilkan di dalam website Anda. Semakin banyak komponen, struktur website akan semakin lengkap.</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <AccordionSection
+        id="elements"
+        title="9. Elemen & Komponen yang Diinginkan"
+        description="Pilih bagian apa saja yang ingin ditampilkan di dalam website Anda."
+        tooltip="Pilih blok atau komponen apa saja yang sifatnya wajib ada pada halaman website Anda nantinya."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
             { id: 'hero', label: 'Hero Section (Headline)', desc: 'Bagian paling atas dengan judul besar, teks pembuka, dan tombol utama (CTA).', icon: <Target className="w-5 h-5" /> },
             { id: 'menu', label: 'Menu & Navigasi', desc: 'Baris navigasi di atas untuk pindah antar halaman atau bagian website.', icon: <Layout className="w-5 h-5" /> },
@@ -95,13 +130,10 @@ const Step5: React.FC<Step5Props> = ({
           ].map(item => (
             <label 
               key={item.id} 
+              onClick={() => handleElementToggle(item.label)}
               className={`flex items-start gap-4 p-5 border rounded-2xl cursor-pointer transition-all duration-300 group ${formData.elements.includes(item.label) ? 'border-black bg-black/5 shadow-sm' : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}`}
             >
               <div 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleElementToggle(item.label);
-                }} 
                 className={`mt-1 shrink-0 transition-transform duration-300 ${formData.elements.includes(item.label) ? 'scale-110' : 'group-hover:scale-110'}`}
               >
                 {formData.elements.includes(item.label) 
@@ -150,19 +182,16 @@ const Step5: React.FC<Step5Props> = ({
             <p className="text-[10px] text-gray-400 mt-8 text-center italic">*Urutan komponen dapat disesuaikan kembali saat proses desain berlangsung.</p>
           </div>
         )}
-      </section>
+      </AccordionSection>
 
       {/* 10. Pembayaran & Transaksi */}
-      <section>
-         <div className="mb-10">
-          <h2 className="text-xl font-medium tracking-tight mb-4 flex items-center">
-            10. Pembayaran & Transaksi (Bila Jualan Online)
-            <InfoTooltip text="Atur metode bagaimana pembeli menyelesaikan pembayaran. Integrasi Payment Gateway memudahkan pengecekan otomatis, namun biasanya dipotong biaya admin per transaksi." />
-          </h2>
-          <p className="text-sm text-gray-500">Bagaimana Anda ingin melayani pembeli di website Anda?</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <AccordionSection
+        id="payment"
+        title="10. Pembayaran & Transaksi"
+        description="Bagaimana Anda ingin melayani pembeli di website Anda?"
+        tooltip="Integrasi Payment Gateway memudahkan pengecekan otomatis, namun biasanya dipotong biaya admin per transaksi."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-6">
           {[
             { id: 'Checkout via WhatsApp', desc: 'Pembeli klik pesanan lalu meluncur otomatis ke nomor WhatsApp admin.' },
             { id: 'Hitung Ongkir Otomatis', desc: 'Sistem dapat menghitung biaya kirim (JNE, SiCepat, dll) secara otomatis.' },
@@ -171,9 +200,9 @@ const Step5: React.FC<Step5Props> = ({
             { id: 'Invoice Otomatis', desc: 'Cetak nota struk otomatis dikirimkan ke email pembeli.' },
             { id: 'Sistem Diskon / Kupon', desc: 'Mendapat fitur pembuatan kode potongan harga untuk event promo.' }
           ].map(item => (
-            <label key={item.id} className="flex flex-col gap-2 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
+            <label key={item.id} onClick={() => handleEcommerceToggle(item.id)} className="flex flex-col gap-2 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
               <div className="flex items-center gap-3">
-                 <div onClick={() => handleEcommerceToggle(item.id)} className="text-gray-300 group-hover:text-black transition-colors">
+                 <div className="text-gray-300 group-hover:text-black transition-colors">
                   {formData.ecommerceFeatures.includes(item.id) 
                     ? <CheckSquare className="text-black w-5 h-5" strokeWidth={1.5} />
                     : <Square className="w-5 h-5" strokeWidth={1.5} />
@@ -185,27 +214,24 @@ const Step5: React.FC<Step5Props> = ({
             </label>
           ))}
         </div>
-      </section>
+      </AccordionSection>
 
       {/* 11. Keamanan & Performa */}
-      <section>
-         <div className="mb-10">
-          <h2 className="text-xl font-medium tracking-tight mb-4 flex items-center">
-            11. Keamanan, Performa & Legalitas
-            <InfoTooltip text="Kami sarankan setidaknya menggunakan SSL (Gembok Hijau) untuk faktor keamanan minimum, dan Keamanan Anti Spam apabila memiliki Form Kontak." />
-          </h2>
-          <p className="text-sm text-gray-500">Aspek krusial untuk menjaga agar website Anda aman dari gangguan hacker dan tuntutan hukum.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <AccordionSection
+        id="security"
+        title="11. Keamanan, Performa & Legalitas"
+        description="Aspek krusial untuk menjaga agar website Anda aman dan terpercaya."
+        tooltip="Kami sarankan setidaknya menggunakan SSL dan Keamanan Anti Spam."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
           {[
             { id: 'Gembok Hijau (Sertifikat SSL)', desc: 'Agar browser tidak memblokir web Anda dan tidak ditandai "Not Secure".', icon: <ShieldCheck className="w-5 h-5" /> },
             { id: 'Pelindung Anti Spam', desc: 'Mencegah robot (bot) mengirim promo judi/spam pada form kontak.', icon: <ShieldCheck className="w-5 h-5" /> },
             { id: 'Sistem Backup Mingguan', desc: 'Untuk menyelamatkan data bila terjadi eror, virus, atau tak sengaja terhapus.', icon: <Server className="w-5 h-5" /> },
             { id: 'Halaman Kebijakan Privasi', desc: 'Syarat mutlak standar global bila web Anda meminta email/no HP orang.', icon: <FileText className="w-5 h-5" /> }
           ].map(item => (
-            <label key={item.id} className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
-              <div onClick={() => handleSecurityToggle(item.id)} className="text-gray-300 group-hover:text-black transition-colors mt-0.5">
+            <label key={item.id} onClick={() => handleSecurityToggle(item.id)} className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
+              <div className="text-gray-300 group-hover:text-black transition-colors mt-0.5">
                 {formData.securityFeatures.includes(item.id) 
                   ? <CheckSquare className="text-black w-5 h-5" strokeWidth={1.5} />
                   : <Square className="w-5 h-5" strokeWidth={1.5} />
@@ -223,19 +249,16 @@ const Step5: React.FC<Step5Props> = ({
             </label>
           ))}
         </div>
-      </section>
+      </AccordionSection>
 
       {/* 12. Fitur Pemanis Tambahan */}
-      <section>
-         <div className="mb-10">
-          <h2 className="text-xl font-medium tracking-tight mb-4 flex items-center">
-            12. Fitur Pemanis Tambahan (Opsional)
-            <InfoTooltip text="Lengkapi fungsi website Anda dengan aksesoris tambahan yang memanjakan pengunjung." />
-          </h2>
-          <p className="text-sm text-gray-500">Pemanis agar website Anda lebih canggih dan mudah ditemukan.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <AccordionSection
+        id="extra"
+        title="12. Fitur Pemanis Tambahan (Opsional)"
+        description="Pemanis agar website Anda lebih canggih dan mudah ditemukan."
+        tooltip="Lengkapi fungsi website Anda dengan aksesoris tambahan yang memanjakan pengunjung."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
           {[
             { id: 'wa-icon', label: 'Pintasan Chat WhatsApp', desc: 'Ikon logo WA melayang di pojok layar, pengunjung bisa langsung klik dan chat.', icon: <MessageCircle className="w-5 h-5" /> },
             { id: 'ai-assistant', label: 'Integrasi Chatbot & AI', desc: 'Asisten pintar (robot) untuk balas pertanyaan dasar.', icon: <Cpu className="w-5 h-5" /> },
@@ -246,9 +269,9 @@ const Step5: React.FC<Step5Props> = ({
             { id: 'seo', label: 'Kunci Masuk Google (SEO)', desc: 'Optimasi agar web Anda gampang dicari dan berpeluang tampil di halaman depan.', icon: <Search className="w-5 h-5" /> },
             { id: 'analytics', label: 'Laporan Pengunjung', desc: 'Fitur pelacak jumlah orang buka web Anda tiap minggu.', icon: <BarChart3 className="w-5 h-5" /> }
           ].map(item => (
-            <label key={item.id} className="flex flex-col gap-2 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
+            <label key={item.id} onClick={() => handleFeatureToggle(item.label)} className="flex flex-col gap-2 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors group">
               <div className="flex items-center gap-3">
-                 <div onClick={() => handleFeatureToggle(item.label)} className="text-gray-300 group-hover:text-black transition-colors">
+                 <div className="text-gray-300 group-hover:text-black transition-colors">
                   {formData.features.includes(item.label) 
                     ? <CheckSquare className="text-black w-5 h-5" strokeWidth={1.5} />
                     : <Square className="w-5 h-5" strokeWidth={1.5} />
@@ -271,21 +294,18 @@ const Step5: React.FC<Step5Props> = ({
             Pembuatan asisten pintar/Chatbot AI memerlukan API pihak ketiga (seperti OpenAI atau Google Gemini) yang memiliki skema langganan atau biaya per penggunaan di luar dari harga pembuatan website standar.
           </div>
         )}
-      </section>
+      </AccordionSection>
 
       {/* 13. Tujuan Jangka Panjang */}
-      <section>
-        <div className="mb-6">
-          <h2 className="text-xl font-medium tracking-tight mb-2 flex items-center">
-            13. Tujuan Jangka Panjang (Pemasaran & Promosi)
-            <InfoTooltip text="Website harus disebarluaskan agar mendatangkan kunjungan. Opsi seperti SEO atau Google Ads membantu menembus halaman atas hasil pencarian." />
-          </h2>
-          <p className="text-sm text-gray-500 leading-relaxed">Punya website itu seperti punya ruko di gang sepi. Agar ramai, kita butuh sebar brosur (Iklan) atau pasang plang arah (SEO). Ingat, membuat web <span className="font-semibold text-black">belum tentu langsung viral di hari pertama</span>. Ini butuh proses dan biaya di luar pembuatan website.</p>
-        </div>
-
-        <div className="bg-[#fafafa] border border-gray-200 rounded-xl p-5 mb-4">
+      <AccordionSection
+        id="marketing"
+        title="13. Tujuan Pemasaran & Promosi"
+        description="Punya website itu seperti punya ruko. Agar ramai, kita butuh promosi."
+        tooltip="Website harus disebarluaskan agar mendatangkan kunjungan."
+      >
+        <div className="bg-[#fafafa] border border-gray-200 rounded-xl p-5 mb-4 mt-6">
             <h4 className="text-sm font-medium mb-3">Apa strategi Anda untuk meramaikan website ini nanti?</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {[
               { id: 'seo_lanjut', label: 'SEO Lanjutan', desc: 'Sabar membangun kualitas di Google (butuh waktu 3-6 bulan).', icon: <Search className="w-5 h-5" /> },
               { id: 'iklan_ads', label: 'Iklan Berbayar (Google/FB Ads)', desc: 'Langsung tampil di atas Google/IG tapi bayar harian.', icon: <Target className="w-5 h-5" /> },
@@ -312,10 +332,10 @@ const Step5: React.FC<Step5Props> = ({
             ))}
             </div>
             <p className="text-xs text-gray-500 mt-4 leading-relaxed bg-white p-3 border border-gray-100 rounded-lg">
-                💡 <b>Perlu Dipahami:</b> Biaya untuk pasang Iklan Google Ads atau Jasa SEO (Optimasi level ahli) merupakan tagihan yang terpisah dari biaya jasa pembuatan website awal. Personalisasi seperti artikel spesifik di Google butuh riset mendalam.
+                💡 <b>Perlu Dipahami:</b> Biaya untuk pasang Iklan Google Ads atau Jasa SEO merupakan tagihan yang terpisah dari biaya jasa pembuatan website awal.
             </p>
         </div>
-      </section>
+      </AccordionSection>
 
       {/* 14. Anggaran */}
       <section>
@@ -355,83 +375,82 @@ const Step5: React.FC<Step5Props> = ({
       </section>
 
       {/* 15. Serah Terima & Panduan Penggunaan */}
-      <section>
-        <div className="mb-8">
-          <h2 className="text-xl font-medium tracking-tight mb-2 flex items-center">
-            15. Serah Terima & Panduan Penggunaan
-            <InfoTooltip text="Kami memastikan Anda tidak hanya menerima website, tapi juga tahu cara mengoperasikannya secara mandiri." />
-          </h2>
-          <p className="text-sm text-gray-500">Pilih bagaimana Anda ingin kami membekali Anda agar mahir mengelola website sendiri.</p>
-        </div>
-
-        {formData.hostingStatus === 'terima_beres' || formData.domainStatus === 'Belum Punya (Bantu Belikan)' ? (
-          <div className="mb-8 p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
-            <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-blue-900 mb-1">Jaminan Kepemilikan Aset</h4>
-              <p className="text-xs text-blue-800/80 leading-relaxed">
-                Semua akun pendaftaran (Hosting/Domain) akan menggunakan data Anda dan diserahkan 100% (Username & Password). Kami tidak menahan kepemilikan aset digital Anda.
-              </p>
-            </div>
-          </div>
-        ) : null}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {[
-            { id: 'pdf', label: 'E-Book Panduan (PDF)', desc: 'Dokumen tertulis dengan screenshot langkah demi langkah. Cocok untuk dibaca santai.', icon: <FileText className="w-5 h-5" /> },
-            { id: 'video_recorded', label: 'Video Tutorial Eksklusif', desc: 'Rekaman layar khusus menjelaskan cara ganti tulisan, gambar, dan posting blog.', icon: <Video className="w-5 h-5" /> },
-            { id: 'zoom', label: 'Live Training (Multi-Platform)', desc: 'Sesi privat via Zoom, Meet, WhatsApp, Email, atau Messenger untuk tanya jawab riil.', icon: <Users className="w-5 h-5" /> },
-            { id: 'web_guide', label: 'Halaman Panduan di Web', desc: 'Dibuatkan halaman khusus "Cara Pakai" yang hanya bisa diakses oleh Anda di dalam web.', icon: <Globe className="w-5 h-5" /> },
-            { id: 'maintenance', label: 'Dukungan & Perawatan (1 Bulan)', desc: 'Bantuan teknis gratis selama 30 hari pertama setelah serah terima selesai.', icon: <Server className="w-5 h-5" /> }
-          ].map(item => (
-            <label 
-              key={item.id} 
-              className={`flex items-start gap-4 p-5 border rounded-2xl cursor-pointer transition-all ${formData.handoverFormat === item.id ? 'border-black bg-black text-white shadow-xl translate-y-[-2px]' : 'border-gray-100 bg-white hover:border-gray-300'}`}
-            >
-              <div className="mt-1">
-                <input 
-                  type="radio" 
-                  name="handoverFormat" 
-                  value={item.id}
-                  checked={formData.handoverFormat === item.id}
-                  onChange={(e) => setFormData({...formData, handoverFormat: e.target.value})}
-                  className={`w-4 h-4 accent-white ${formData.handoverFormat === item.id ? '' : 'accent-black'}`}
-                />
+      <AccordionSection
+        id="handover"
+        title="15. Serah Terima & Panduan Penggunaan"
+        description="Kami memastikan Anda tahu cara mengoperasikannya secara mandiri."
+        tooltip="Kami memberikan edukasi agar Anda mahir mengelola website sendiri."
+      >
+        <div className="pt-6">
+          {formData.hostingStatus === 'terima_beres' || formData.domainStatus === 'Belum Punya (Bantu Belikan)' ? (
+            <div className="mb-8 p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`${formData.handoverFormat === item.id ? 'text-white' : 'text-gray-400'}`}>
-                    {item.icon}
-                  </div>
-                  <span className="font-bold text-sm">{item.label}</span>
-                </div>
-                <p className={`text-[11px] leading-relaxed ${formData.handoverFormat === item.id ? 'text-gray-300' : 'text-gray-500'}`}>{item.desc}</p>
+                <h4 className="text-sm font-bold text-blue-900 mb-1">Jaminan Kepemilikan Aset</h4>
+                <p className="text-xs text-blue-800/80 leading-relaxed">
+                  Semua akun pendaftaran (Hosting/Domain) akan menggunakan data Anda dan diserahkan 100% (Username & Password). Kami tidak menahan kepemilikan aset digital Anda.
+                </p>
               </div>
-            </label>
-          ))}
-        </div>
+            </div>
+          ) : null}
 
-        <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
-           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Daftar Paket Serah Terima Standar:</h4>
-           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                'Akses Full Panel Hosting & Domain',
-                'Kredensial Login Admin Website',
-                'File Source Code (Format .zip)',
-                'Aset Gambar & Ikon Original',
-                'Akun Email Bisnis (Bila Dipesan)',
-                'Sertifikat Lisensi Aset (Bila Ada)'
-              ].map(check => (
-                <li key={check} className="flex items-center gap-2 text-xs text-gray-600">
-                  <CheckSquare className="w-4 h-4 text-green-500" />
-                  {check}
-                </li>
-              ))}
-           </ul>
+          <div className="flex flex-col gap-4 mb-8">
+            {[
+              { id: 'pdf', label: 'E-Book Panduan (PDF)', desc: 'Dokumen tertulis dengan screenshot langkah demi langkah. Cocok untuk dibaca santai.', icon: <FileText className="w-5 h-5" /> },
+              { id: 'video_recorded', label: 'Video Tutorial Eksklusif', desc: 'Rekaman layar khusus menjelaskan cara ganti tulisan, gambar, dan posting blog.', icon: <Video className="w-5 h-5" /> },
+              { id: 'zoom', label: 'Live Training (Multi-Platform)', desc: 'Sesi privat via Zoom, Meet, WhatsApp, Email, atau Messenger untuk tanya jawab riil.', icon: <Users className="w-5 h-5" /> },
+              { id: 'web_guide', label: 'Halaman Panduan di Web', desc: 'Dibuatkan halaman khusus "Cara Pakai" yang hanya bisa diakses oleh Anda di dalam web.', icon: <Globe className="w-5 h-5" /> },
+              { id: 'maintenance', label: 'Dukungan & Perawatan (1 Bulan)', desc: 'Bantuan teknis gratis selama 30 hari pertama setelah serah terima selesai.', icon: <Server className="w-5 h-5" /> }
+            ].map(item => (
+              <label 
+                key={item.id} 
+                className={`flex items-start gap-4 p-5 border rounded-2xl cursor-pointer transition-all ${formData.handoverFormat === item.id ? 'border-black bg-black text-white shadow-xl translate-y-[-2px]' : 'border-gray-100 bg-white hover:border-gray-300'}`}
+              >
+                <div className="mt-1">
+                  <input 
+                    type="radio" 
+                    name="handoverFormat" 
+                    value={item.id}
+                    checked={formData.handoverFormat === item.id}
+                    onChange={(e) => setFormData({...formData, handoverFormat: e.target.value})}
+                    className={`w-4 h-4 accent-white ${formData.handoverFormat === item.id ? '' : 'accent-black'}`}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`${formData.handoverFormat === item.id ? 'text-white' : 'text-gray-400'}`}>
+                      {item.icon}
+                    </div>
+                    <span className="font-bold text-sm">{item.label}</span>
+                  </div>
+                  <p className={`text-[11px] leading-relaxed ${formData.handoverFormat === item.id ? 'text-gray-300' : 'text-gray-500'}`}>{item.desc}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Daftar Paket Serah Terima Standar:</h4>
+             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  'Akses Full Panel Hosting & Domain',
+                  'Kredensial Login Admin Website',
+                  'File Source Code (Format .zip)',
+                  'Aset Gambar & Ikon Original',
+                  'Akun Email Bisnis (Bila Dipesan)',
+                  'Sertifikat Lisensi Aset (Bila Ada)'
+                ].map(check => (
+                  <li key={check} className="flex items-center gap-2 text-xs text-gray-600">
+                    <CheckSquare className="w-4 h-4 text-green-500" />
+                    {check}
+                  </li>
+                ))}
+             </ul>
+          </div>
         </div>
-      </section>
+      </AccordionSection>
 
       {/* 16. Catatan Akhir & Link Dokumen Tambahan */}
       <section>
@@ -450,6 +469,83 @@ const Step5: React.FC<Step5Props> = ({
             onChange={(e) => setFormData({...formData, additionalNotes: e.target.value})}
             className="w-full border border-gray-200 p-4 focus:outline-none focus:border-black transition-all rounded-2xl text-sm min-h-[120px] resize-none bg-gray-50 focus:bg-white"
           />
+        </div>
+      </section>
+
+      {/* 17. AI Strategic Consultant Section */}
+      <section className="mt-20 scroll-mt-24" id="ai-strategy">
+        <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 rounded-[32px] p-1 shadow-2xl overflow-hidden">
+          <div className="bg-white/5 backdrop-blur-xl rounded-[31px] p-8 md:p-12">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl blur-xl animate-pulse"></div>
+                  <div className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
+                    <Sparkles className="w-8 h-8 text-black" strokeWidth={2.5} />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white tracking-tight">AI Strategic Consultant</h3>
+                  <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-1">Dapatkan Analisis Instan untuk Proyek Anda</p>
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                onClick={handleAIAnalyze}
+                disabled={isAnalyzing}
+                className={`px-8 py-4 rounded-2xl font-bold text-sm tracking-widest uppercase transition-all duration-500 flex items-center gap-3 ${
+                  isAnalyzing 
+                    ? 'bg-white/10 text-white/50 cursor-not-allowed' 
+                    : 'bg-white text-black hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]'
+                }`}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                    Menganalisis...
+                  </>
+                ) : (
+                  <>
+                    <Cpu className="w-4 h-4" />
+                    Mulai Analisis Brief
+                  </>
+                )}
+              </button>
+            </div>
+
+            {aiAnalysis ? (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <div className="prose prose-invert max-w-none prose-sm prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-li:text-gray-300 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 shadow-inner mb-8">
+                  <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
+                </div>
+                
+                <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <p className="text-[10px] text-gray-500 italic">
+                    *Analisis ini dihasilkan secara otomatis oleh AI berdasarkan brief Anda.
+                  </p>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(aiAnalysis);
+                      alert('Hasil analisis disalin!');
+                    }}
+                    className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2 text-white"
+                  >
+                    <CheckSquare className="w-4 h-4" />
+                    Salin Hasil
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-20 text-center border-2 border-dashed border-white/10 rounded-3xl">
+                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Cpu className="w-6 h-6 text-white/20" />
+                </div>
+                <p className="text-gray-500 text-sm italic">Klik tombol di atas untuk melihat bagaimana AI membedah kebutuhan website Anda.</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>
