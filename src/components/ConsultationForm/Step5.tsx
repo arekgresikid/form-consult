@@ -516,7 +516,7 @@ const Step5: React.FC<Step5Props> = ({
 
             {aiAnalysis ? (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                <div className="prose prose-invert max-w-none prose-sm prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-li:text-gray-300 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 shadow-inner mb-8">
+                <div className="prose prose-invert max-w-none prose-sm text-white prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-li:text-gray-300 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 shadow-inner mb-8">
                   <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
                 </div>
                 
