@@ -7,32 +7,12 @@ app.use(express.json());
 
 app.post("/api/submit-consultation", async (req, res) => {
   try {
-    const { hp_field, turnstileToken, ...formData } = req.body;
+    const { hp_field, ...formData } = req.body;
 
     // Simple Anti-Bot: Honeypot field
     if (hp_field) {
       console.warn('Bot detected via honeypot field');
       return res.status(400).json({ success: false, message: "Aktivitas mencurigakan terdeteksi." });
-    }
-
-    // Cloudflare Turnstile Verification
-    if (!turnstileToken) {
-      return res.status(400).json({ success: false, message: "Verifikasi keamanan (Turnstile) diperlukan." });
-    }
-
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-    const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        secret: turnstileSecret,
-        response: turnstileToken,
-      }),
-    });
-
-    const verifyData: any = await verifyResponse.json();
-    if (!verifyData.success) {
-      return res.status(400).json({ success: false, message: "Verifikasi keamanan gagal. Silakan coba lagi." });
     }
 
     const emailUser = process.env.EMAIL_USER;

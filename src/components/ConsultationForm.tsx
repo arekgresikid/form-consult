@@ -69,7 +69,6 @@ export default function ConsultationForm() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [turnstileToken, setTurnstileToken] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
@@ -108,27 +107,6 @@ export default function ConsultationForm() {
     
     return `https://wa.me/${number}?text=${message}`;
   };
-
-  // Initialize Turnstile widget when reaching Step 5
-  useLayoutEffect(() => {
-    if (currentStep === totalSteps && (window as any).turnstile) {
-      const container = document.getElementById('turnstile-container');
-      if (container && container.innerHTML === '') {
-        (window as any).turnstile.render('#turnstile-container', {
-          sitekey: '0x4AAAAAABh0uR4HC9nKVVTQ',
-          callback: (token: string) => {
-            setTurnstileToken(token);
-          },
-          'error-callback': () => {
-            setTurnstileToken('');
-          },
-          'expired-callback': () => {
-            setTurnstileToken('');
-          },
-        });
-      }
-    }
-  }, [currentStep, totalSteps]);
 
   // Prevent auto-focus and keyboard jump on mobile when switching steps
   useLayoutEffect(() => {
@@ -291,22 +269,12 @@ export default function ConsultationForm() {
       return;
     }
 
-    if (!turnstileToken) {
-      setModalConfig({
-        isOpen: true,
-        type: 'error',
-        title: 'Verifikasi Gagal',
-        message: `Mohon selesaikan verifikasi keamanan (Turnstile) terlebih dahulu.`
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const response = await fetch('/api/submit-consultation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, turnstileToken }),
+        body: JSON.stringify({ ...formData }),
       });
 
       if (response.ok) {
@@ -327,7 +295,6 @@ export default function ConsultationForm() {
             budget: '', handoverFormat: '', referenceUrl: '', proposalLink: '', 
             logoUrl: '', contentUrl: '', additionalNotes: '', hp_field: ''
         });
-        setTurnstileToken('');
         setCurrentStep(1);
       } else {
         throw new Error('Gagal mengirim form');
@@ -357,7 +324,6 @@ export default function ConsultationForm() {
         budget: '', handoverFormat: '', referenceUrl: '', proposalLink: '', 
         logoUrl: '', contentUrl: '', additionalNotes: '', hp_field: ''
       });
-      setTurnstileToken('');
       setCurrentStep(1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -455,21 +421,6 @@ export default function ConsultationForm() {
             />
           )}
         </div>
-
-        {/* Cloudflare Turnstile Anti-Bot (Only on Last Step) */}
-        {currentStep === totalSteps && (
-          <div className="p-8 bg-gray-50 border border-gray-100 rounded-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="text-center md:text-left">
-                <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-2">Verifikasi Keamanan</h4>
-                <p className="text-xs text-gray-500 max-w-xs">Kami menggunakan Cloudflare Turnstile untuk memastikan Anda bukan robot.</p>
-              </div>
-              <div id="turnstile-container" className="flex justify-center md:justify-end min-h-[65px] transition-all duration-300">
-                {/* Turnstile widget will be rendered here */}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Navigation Buttons */}
         <div className="pt-8 border-t border-gray-100 flex items-center justify-between">

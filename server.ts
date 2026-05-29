@@ -16,32 +16,7 @@ async function startServer() {
 
   app.post("/api/submit-consultation", async (req, res) => {
     try {
-      const { turnstileToken, ...formData } = req.body;
-
-      const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-      if (!turnstileSecret) {
-        console.error("TURNSTILE_SECRET_KEY is missing in environment");
-        return res.status(500).json({ success: false, message: "Server security not configured." });
-      }
-
-      // Verify Turnstile Token (Bypass in development)
-      if (process.env.NODE_ENV === 'production') {
-        const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            secret: turnstileSecret,
-            response: turnstileToken,
-          }),
-        });
-
-        const verifyData: any = await verifyResponse.json();
-        if (!verifyData.success) {
-          return res.status(400).json({ success: false, message: "Gagal verifikasi keamanan (Turnstile)." });
-        }
-      } else {
-        console.log("Turnstile verification bypassed (Development Mode)");
-      }
+      const { hp_field, ...formData } = req.body;
 
       const emailUser = process.env.EMAIL_USER;
       const emailPass = process.env.EMAIL_APP_PASSWORD;
