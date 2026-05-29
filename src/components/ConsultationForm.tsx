@@ -73,6 +73,16 @@ export default function ConsultationForm() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (currentStep === totalSteps) {
+      const timer = setTimeout(() => setCanSubmit(true), 500);
+      return () => clearTimeout(timer);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [currentStep, totalSteps]);
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -444,8 +454,8 @@ export default function ConsultationForm() {
           ) : (
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="ml-auto px-10 py-4 bg-black text-white text-sm font-bold tracking-widest uppercase rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 active:scale-95"
+              disabled={isSubmitting || !canSubmit}
+              className={`ml-auto px-10 py-4 text-white text-sm font-bold tracking-widest uppercase rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95 ${(!canSubmit || isSubmitting) ? 'bg-gray-400 scale-100 cursor-not-allowed' : 'bg-black hover:bg-gray-800'}`}
             >
               {isSubmitting ? 'Mengirim...' : 'Kirim Konsultasi'}
             </button>
